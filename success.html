@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+</head>
+<body>
+<h2>Welcome to Secure Dashboard</h2>
+<button onclick="logout()">Logout</button>
+
+<script>
+const WEBAPP="YOUR_WEB_APP_URL";
+
+async function checkSession(){
+ const token=localStorage.getItem("sessionToken");
+ if(!token) window.location="login.html";
+
+ const res=await fetch(WEBAPP,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({action:"verifySession",token:token})
+ });
+
+ const data=await res.json();
+ if(!data.success) window.location="login.html";
+}
+
+function logout(){
+ localStorage.removeItem("sessionToken");
+ window.location="login.html";
+}
+
+checkSession();
+</script>
+</body>
+</html>
