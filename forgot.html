@@ -1,0 +1,20 @@
+<form id="resetForm">
+  <input type="email" id="email" placeholder="Enter email" required>
+  <button>Send Reset Link</button>
+  <div id="msg"></div>
+</form>
+
+<script>
+  const WEBAPP = "YOUR_WEB_APP_URL";
+  
+  document.getElementById("resetForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const res = await fetch(WEBAPP, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "requestReset", email: email.value.trim() })
+    });
+    const data = await res.json();
+    msg.textContent = data.message;
+  });
+</script>
