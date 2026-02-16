@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<style>
+body{font-family:Arial;background:#eef2f7;padding:40px}
+form{max-width:350px;margin:auto;background:white;padding:25px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:4px}
+button{width:100%;padding:10px;background:#43a047;color:white;border:none;border-radius:4px;cursor:pointer}
+button.loading{opacity:.7;pointer-events:none}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .6s linear infinite;margin-left:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.message{margin-top:10px;font-size:14px}
+.success{color:green}
+.error{color:red}
+</style>
+</head>
+<body>
+
+<form id="loginForm">
+<h2>Login</h2>
+<input type="email" id="email" placeholder="Email" required>
+<input type="password" id="password" placeholder="Password" required>
+<button id="btn">Login</button>
+<div id="msg" class="message"></div>
+</form>
+
+<script>
+const WEBAPP="YOUR_WEB_APP_URL";
+
+document.getElementById("loginForm").addEventListener("submit",async function(e){
+ e.preventDefault();
+ const btn=document.getElementById("btn");
+ const msg=document.getElementById("msg");
+
+ btn.classList.add("loading");
+ btn.innerHTML="Authenticating <span class='spinner'></span>";
+ msg.textContent="Verifying credentials...";
+
+ try{
+   const res=await fetch(WEBAPP,{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({
+       action:"login",
+       email:email.value.trim(),
+       password:password.value
+     })
+   });
+
+   const data=await res.json();
+
+   btn.classList.remove("loading");
+   btn.innerHTML="Login";
+
+   if(data.success){
+     localStorage.setItem("sessionToken",data.token);
+     msg.className="message success";
+     msg.textContent="Login successful...";
+     setTimeout(()=>window.location="success.html",1200);
+   }else{
+     msg.className="message error";
+     msg.textContent=data.message;
+   }
+
+ }catch(err){
+   btn.classList.remove("loading");
+   btn.innerHTML="Login";
+   msg.className="message error";
+   msg.textContent="Network error";
+ }
+});
+</script>
+</body>
+</html>
