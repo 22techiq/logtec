@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Register</title>
+
+<style>
+body{font-family:Arial;background:#f4f6f9;padding:40px}
+form{max-width:400px;margin:auto;background:white;padding:25px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:4px}
+button{width:100%;padding:10px;background:#1e88e5;color:white;border:none;border-radius:4px;cursor:pointer}
+button.loading{opacity:.7;pointer-events:none}
+.message{margin-top:10px;font-size:14px}
+.success{color:green}
+.error{color:red}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .6s linear infinite;margin-left:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.strength{height:6px;background:#ddd;border-radius:4px;margin-top:4px}
+.strength div{height:100%;width:0%;border-radius:4px;transition:.3s}
+.field{position:relative}
+.eye{position:absolute;right:10px;top:12px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<form id="regForm">
+<h2>Create Account</h2>
+
+<input type="text" id="name" placeholder="Full Name" required>
+<input type="email" id="email" placeholder="Email" required>
+
+<div class="field">
+<input type="password" id="password" placeholder="Password" required>
+<span class="eye" onclick="toggle('password')">👁</span>
+<div class="strength"><div id="bar"></div></div>
+</div>
+
+<div class="field">
+<input type="password" id="confirm" placeholder="Confirm Password" required>
+<span class="eye" onclick="toggle('confirm')">👁</span>
+</div>
+
+<button id="btn">Register</button>
+<div id="msg" class="message"></div>
+</form>
+
+<script>
+const WEBAPP="https://script.google.com/macros/s/AKfycbxAVz1fgbNvB0MG6dCMPnpZ1QXOqZr_CzV_uaSzS3GWHTyXs8T644B2H93UaJ9xYgK3/exec";
+
+function toggle(id){
+ const field=document.getElementById(id);
+ field.type=field.type==="password"?"text":"password";
+}
+
+document.getElementById("password").addEventListener("input",function(){
+ const val=this.value;
+ const bar=document.getElementById("bar");
+ let strength=0;
+ if(val.length>=8) strength++;
+ if(/[A-Z]/.test(val)) strength++;
+ if(/[0-9]/.test(val)) strength++;
+ if(/[^A-Za-z0-9]/.test(val)) strength++;
+ const percent=(strength/4)*100;
+ bar.style.width=percent+"%";
+ bar.style.background=percent<50?"red":percent<75?"orange":"green";
+});
+
+document.getElementById("regForm").addEventListener("submit",async function(e){
+ e.preventDefault();
+
+ const btn=document.getElementById("btn");
+ const msg=document.getElementById("msg");
+
+ const name=name.value.trim();
+ const email=email.value.trim();
+ const password=password.value;
+ const confirm=confirm.value;
+
+ if(password!==confirm){
+   msg.className="message error";
+   msg.textContent="Passwords do not match";
+   return;
+ }
+
+ btn.classList.add("loading");
+ btn.innerHTML="Processing <span class='spinner'></span>";
+ msg.textContent="Creating secure account...";
+
+ try{
+   const res=await fetch(WEBAPP,{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({
+       action:"register",
+       name:name,
+       email:email,
+       password:password
+     })
+   });
+
+   const data=await res.json();
+
+   btn.classList.remove("loading");
+   btn.innerHTML="Register";
+
+   if(data.success){
+     msg.className="message success";
+     msg.textContent="Verification email sent. Check inbox.";
+     e.target.reset();
+   }else{
+     msg.className="message error";
+     msg.textContent=data.message;
+   }
+
+ }catch(err){
+   btn.classList.remove("loading");
+   btn.innerHTML="Register";
+   msg.className="message error";
+   msg.textContent="Network error";
+ }
+});
+</script>
+</body>
+</html>
