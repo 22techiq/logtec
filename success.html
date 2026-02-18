@@ -13,7 +13,7 @@ const WEBAPP="https://script.google.com/macros/s/AKfycbxNvLwZx-OwJpTswHn0n49lm0m
 
 async function checkSession(){
  const token=localStorage.getItem("sessionToken");
- if(!token) window.location="login.html";
+ if(!token) window.location="index.html";
 
  const res=await fetch(WEBAPP,{
    method:"POST",
@@ -22,12 +22,12 @@ async function checkSession(){
  });
 
  const data=await res.json();
- if(!data.success) window.location="login.html";
+ if(!data.success) window.location="index.html";
 }
 
 function logout(){
  localStorage.removeItem("sessionToken");
- window.location="login.html";
+ window.location="index.html";
 }
 
 checkSession();
